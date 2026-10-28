@@ -1,0 +1,152 @@
+import { Button, VerticalBox, HorizontalBox, GroupBox, LineEdit, ComboBox, TextEdit } from "std-widgets.slint";
+
+export component MainWindow inherits Window {
+    title: "Mine Surveying Breakthrough Calculator";
+    preferred-width: 560px;
+    preferred-height: 720px;
+
+    // --- Target point K ---
+    in-out property <string> coord-x: "24120.578";
+    in-out property <string> coord-y: "12777.635";
+
+    // --- Shaft configuration ---
+    in-out property <int> shaft-mode-index: 0; // 0 = Single, 1 = Dual
+    in-out property <string> shaft-depth: "900";
+    in-out property <string> shaft-depth-1: "900";
+    in-out property <string> shaft-depth-2: "900";
+
+    // --- File paths ---
+    in-out property <string> traverse1-path: "test.csv";
+    in-out property <string> traverse2-path: "kanex.csv";
+
+    // --- Output ---
+    in-out property <string> result-m-ozh: "--";
+    in-out property <string> result-mz-ozh: "--";
+    in-out property <string> result-exec-time: "--";
+    in-out property <string> status-message: "";
+
+    callback select-traverse1-file();
+    callback select-traverse2-file();
+    callback execute-calculation();
+
+    VerticalBox {
+        padding: 16px;
+        spacing: 12px;
+
+        Text {
+            text: "3D Underground Mine Surveying Breakthrough Calculator";
+            font-size: 18px;
+            font-weight: 700;
+            horizontal-alignment: center;
+        }
+
+        GroupBox {
+            title: "Target Point K";
+            VerticalBox {
+                HorizontalBox {
+                    Text { text: "X_K:"; vertical-alignment: center; width: 60px; }
+                    LineEdit {
+                        text: coord-x;
+                        edited(value) => { coord-x = value; }
+                    }
+                }
+                HorizontalBox {
+                    Text { text: "Y_K:"; vertical-alignment: center; width: 60px; }
+                    LineEdit {
+                        text: coord-y;
+                        edited(value) => { coord-y = value; }
+                    }
+                }
+            }
+        }
+
+        GroupBox {
+            title: "Shaft Configuration";
+            VerticalBox {
+                ComboBox {
+                    model: ["Single Shaft Datum Mode", "Dual Shaft Datum Mode"];
+                    current-index: shaft-mode-index;
+                    selected(value) => {
+                        shaft-mode-index = self.current-index;
+                    }
+                }
+
+                if shaft-mode-index == 0 : HorizontalBox {
+                    Text { text: "Shaft Depth H (m):"; vertical-alignment: center; width: 160px; }
+                    LineEdit {
+                        text: shaft-depth;
+                        edited(value) => { shaft-depth = value; }
+                    }
+                }
+
+                if shaft-mode-index == 1 : VerticalBox {
+                    HorizontalBox {
+                        Text { text: "Shaft Depth 1 (m):"; vertical-alignment: center; width: 160px; }
+                        LineEdit {
+                            text: shaft-depth-1;
+                            edited(value) => { shaft-depth-1 = value; }
+                        }
+                    }
+                    HorizontalBox {
+                        Text { text: "Shaft Depth 2 (m):"; vertical-alignment: center; width: 160px; }
+                        LineEdit {
+                            text: shaft-depth-2;
+                            edited(value) => { shaft-depth-2 = value; }
+                        }
+                    }
+                }
+            }
+        }
+
+        GroupBox {
+            title: "Traverse Data Files";
+            VerticalBox {
+                HorizontalBox {
+                    Button {
+                        text: "Select Traverse 1 CSV File";
+                        clicked => { select-traverse1-file(); }
+                    }
+                    Text { text: traverse1-path; vertical-alignment: center; }
+                }
+                HorizontalBox {
+                    Button {
+                        text: "Select Traverse 2 CSV File";
+                        clicked => { select-traverse2-file(); }
+                    }
+                    Text { text: traverse2-path; vertical-alignment: center; }
+                }
+            }
+        }
+
+        Button {
+            text: "Execute 3D Spatial Calculation";
+            height: 48px;
+            primary: true;
+            clicked => { execute-calculation(); }
+        }
+
+        GroupBox {
+            title: "Output Results";
+            VerticalBox {
+                HorizontalBox {
+                    Text { text: "Planar Breakthrough Error Boundary (M_ozh):"; }
+                    Text { text: result-m-ozh + " m"; font-weight: 700; }
+                }
+                HorizontalBox {
+                    Text { text: "Vertical Breakthrough Error Boundary (Mz_ozh):"; }
+                    Text { text: result-mz-ozh + " m"; font-weight: 700; }
+                }
+                HorizontalBox {
+                    Text { text: "Algorithmic Execution Time:"; }
+                    Text { text: result-exec-time + " s"; font-weight: 700; }
+                }
+            }
+        }
+
+        Text {
+            text: status-message;
+            color: red;
+            wrap: word-wrap;
+        }
+    }
+}
